@@ -1,24 +1,27 @@
 #pragma once
 
-#include "../TypeTag.h"
-#include "WaveFileBase.h"
+#include "../AudioFileBase.h"
+#include "WaveFormat.h"
 #include <fstream>
 #include <limits>
 #include <span>
 #include <type_traits>
 #include <vector>
 
-template <typename In, typename Normalization> class UncompressedWaveFile : public WaveFileBase {
+template <typename In, typename Normalization> class UncompressedWaveFile : public AudioFileBase {
 public:
   UncompressedWaveFile(std::ifstream stream, std::size_t totalBytes, WaveFormat format, std::size_t channels,
                        std::size_t sampleRate, std::size_t bitsPerSample);
 
   std::size_t bytesLeft() const;
+  WaveFormat format() const;
   template <typename T> std::size_t samplesLeft() const;
 
   template <typename Out, std::size_t N> std::size_t readSamples(std::span<Out, N> out);
 
 private:
+  template <typename... Args> struct TypeTag {};
+
   // when we read native file type we don't have to use temporary buffer
   template <typename std::size_t N> std::size_t readSamples(std::span<In, N>, TypeTag<In, In>);
 
@@ -27,6 +30,7 @@ private:
 
   std::ifstream m_stream;
   std::size_t m_totalBytes;
+  WaveFormat m_format;
   std::vector<In> m_buffer;
   std::size_t m_bytesRead;
 };
@@ -35,8 +39,8 @@ template <typename In, typename Normalization>
 UncompressedWaveFile<In, Normalization>::UncompressedWaveFile(std::ifstream stream, std::size_t totalBytes,
                                                               WaveFormat format, std::size_t channels,
                                                               std::size_t sampleRate, std::size_t bitsPerSample)
-    : WaveFileBase{format, channels, sampleRate, bitsPerSample}, m_stream{std::move(stream)}, m_totalBytes{totalBytes},
-      m_bytesRead{0} {
+    : AudioFileBase{channels, sampleRate, bitsPerSample}, m_stream{std::move(stream)},
+      m_totalBytes{totalBytes}, m_format{format}, m_bytesRead{0} {
 }
 
 template <typename In, typename Normalization> std::size_t UncompressedWaveFile<In, Normalization>::bytesLeft() const {
@@ -47,6 +51,10 @@ template <typename In, typename Normalization>
 template <typename T>
 std::size_t UncompressedWaveFile<In, Normalization>::samplesLeft() const {
   return bytesLeft() / sizeof(T);
+}
+
+template <typename In, typename Normalization> WaveFormat UncompressedWaveFile<In, Normalization>::format() const {
+  return m_format;
 }
 
 template <typename In, typename Normalization>

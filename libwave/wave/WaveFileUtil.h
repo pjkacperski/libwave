@@ -4,7 +4,6 @@
 #include "RiffHeader.h"
 #include "UncompressedWaveFile.h"
 #include "UnknownChunk.h"
-#include "WaveAudioFile.h"
 #include <filesystem>
 #include <memory>
 #include <tuple>

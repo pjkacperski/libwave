@@ -1,8 +1,8 @@
 #include "WaveFileUtil.h"
+#include "../AudioFileTypeEraser.h"
 #include "../ScalarNormalization.h"
 #include "UncompressedWaveFile.h"
 #include "UnknownChunk.h"
-#include "WaveAudioFile.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -114,13 +114,13 @@ static std::unique_ptr<AudioFile> openPcmFile(std::ifstream stream, const Fmt& f
 
   switch (fmt.bitsPerSample) {
   case 8:
-    return std::make_unique<WaveAudioFile<UncompressedWaveFile<std::uint8_t, ScalarNormalization>>>(
+    return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::uint8_t, ScalarNormalization>>>(
         std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 8u);
   case 16:
-    return std::make_unique<WaveAudioFile<UncompressedWaveFile<std::int16_t, ScalarNormalization>>>(
+    return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::int16_t, ScalarNormalization>>>(
         std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 16u);
   case 32:
-    return std::make_unique<WaveAudioFile<UncompressedWaveFile<std::int32_t, ScalarNormalization>>>(
+    return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::int32_t, ScalarNormalization>>>(
         std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 32u);
   default:
     throw std::runtime_error{"invalid file (unsupported bits per sample)"};
@@ -131,7 +131,7 @@ static std::unique_ptr<AudioFile> openIeeeFloatFile(std::ifstream stream, const 
                                                     const OffsetAndSize& dataChunk) {
   switch (fmt.bitsPerSample) {
   case 32:
-    return std::make_unique<WaveAudioFile<UncompressedWaveFile<float, ScalarNormalization>>>(
+    return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<float, ScalarNormalization>>>(
         std::move(stream), dataChunk.size, WaveFormat::IeeeFloat, fmt.channels, fmt.samplesPerSecond, 32u);
   default:
     throw std::runtime_error{"invalid file (unsupported bits per sample)"};
