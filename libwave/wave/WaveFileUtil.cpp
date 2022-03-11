@@ -1,8 +1,10 @@
 #include "WaveFileUtil.h"
+#include "../ScalarNormalization.h"
 #include "UncompressedWaveFile.h"
 #include "UnknownChunk.h"
 #include "WaveAudioFile.h"
 #include <memory>
+#include <string>
 #include <vector>
 
 static void read(std::ifstream& stream, char* ptr, std::size_t count) {
@@ -106,4 +108,54 @@ std::tuple<RiffHeader, std::vector<UnknownChunk>> WaveFileUtil::readRiffAndUnkno
     }
   }
   return std::make_tuple(std::move(riff), std::move(unknownChunks));
+}
+
+static std::unique_ptr<AudioFile> openPcmFile(std::ifstream stream, const Fmt& fmt, const OffsetAndSize& dataChunk) {
+
+  switch (fmt.bitsPerSample) {
+  case 8:
+    return std::make_unique<WaveAudioFile<UncompressedWaveFile<std::uint8_t, ScalarNormalization>>>(
+        std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 8u);
+  case 16:
+    return std::make_unique<WaveAudioFile<UncompressedWaveFile<std::int16_t, ScalarNormalization>>>(
+        std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 16u);
+  case 32:
+    return std::make_unique<WaveAudioFile<UncompressedWaveFile<std::int32_t, ScalarNormalization>>>(
+        std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 32u);
+  default:
+    throw std::runtime_error{"invalid file (unsupported bits per sample)"};
+  }
+}
+
+static std::unique_ptr<AudioFile> openIeeeFloatFile(std::ifstream stream, const Fmt& fmt,
+                                                    const OffsetAndSize& dataChunk) {
+  switch (fmt.bitsPerSample) {
+  case 32:
+    return std::make_unique<WaveAudioFile<UncompressedWaveFile<float, ScalarNormalization>>>(
+        std::move(stream), dataChunk.size, WaveFormat::IeeeFloat, fmt.channels, fmt.samplesPerSecond, 32u);
+  default:
+    throw std::runtime_error{"invalid file (unsupported bits per sample)"};
+  }
+}
+
+std::unique_ptr<AudioFile> WaveFileUtil::openFile(const std::filesystem::path& path) {
+  std::ifstream stream{path, std::ios::binary};
+  if (!stream) {
+    throw std::invalid_argument{"path"};
+  }
+  auto header = readRiff(stream);
+  if (!header.fmt) {
+    throw std::runtime_error{"invalid file (no fmt chunk)"};
+  }
+  if (!header.dataChunk) {
+    throw std::runtime_error{"invalid file (no data chunk)"};
+  }
+  switch (header.fmt->format) {
+  case WaveFormat::Pcm:
+    return openPcmFile(std::move(stream), *header.fmt, *header.dataChunk);
+  case WaveFormat::IeeeFloat:
+    return openIeeeFloatFile(std::move(stream), *header.fmt, *header.dataChunk);
+  default:
+    throw std::runtime_error{"invalid file (unsupported format)"};
+  }
 }
