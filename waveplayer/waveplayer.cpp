@@ -5,11 +5,10 @@
 #include <vector>
 
 int main(int argc, char* argv[]) {
-  // if (argc != 2) {
-  //   throw std::runtime_error{"invalid arguments"};
-  // }
-  auto file = AudioFileUtil::openFile("/home/pjk/Pobrane/M1F1-int16-AFsp.wav");
-
+  if (argc != 2) {
+    throw std::runtime_error{"invalid arguments"};
+  }
+  auto file = AudioFileUtil::openFile(argv[1]);
   snd_pcm_t* handle = nullptr;
   snd_pcm_open(&handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
 
