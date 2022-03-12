@@ -1,6 +1,7 @@
 #include "WaveFileUtil.h"
 #include "../AudioFileTypeEraser.h"
 #include "../ScalarNormalization.h"
+#include "Int12WaveFile.h"
 #include "UncompressedWaveFile.h"
 #include "UnknownChunk.h"
 #include <memory>
@@ -115,13 +116,16 @@ static std::unique_ptr<AudioFile> openPcmFile(std::ifstream stream, const Fmt& f
   switch (fmt.bitsPerSample) {
   case 8:
     return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::uint8_t, ScalarNormalization>>>(
-        std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 8u);
+        std::move(stream), dataChunk.size, fmt.channels, fmt.samplesPerSecond, 8u, WaveFormat::Pcm);
+  case 12:
+    return std::make_unique<AudioFileTypeEraser<Int12WaveFile<ScalarNormalization>>>(
+        std::move(stream), dataChunk.size, fmt.channels, fmt.samplesPerSecond, WaveFormat::Pcm);
   case 16:
     return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::int16_t, ScalarNormalization>>>(
-        std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 16u);
+        std::move(stream), dataChunk.size, fmt.channels, fmt.samplesPerSecond, 16u, WaveFormat::Pcm);
   case 32:
     return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::int32_t, ScalarNormalization>>>(
-        std::move(stream), dataChunk.size, WaveFormat::Pcm, fmt.channels, fmt.samplesPerSecond, 32u);
+        std::move(stream), dataChunk.size, fmt.channels, fmt.samplesPerSecond, 32u, WaveFormat::Pcm);
   default:
     throw std::runtime_error{"invalid file (unsupported bits per sample)"};
   }
@@ -132,7 +136,7 @@ static std::unique_ptr<AudioFile> openIeeeFloatFile(std::ifstream stream, const 
   switch (fmt.bitsPerSample) {
   case 32:
     return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<float, ScalarNormalization>>>(
-        std::move(stream), dataChunk.size, WaveFormat::IeeeFloat, fmt.channels, fmt.samplesPerSecond, 32u);
+        std::move(stream), dataChunk.size, fmt.channels, fmt.samplesPerSecond, 32u, WaveFormat::IeeeFloat);
   default:
     throw std::runtime_error{"invalid file (unsupported bits per sample)"};
   }

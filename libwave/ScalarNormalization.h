@@ -26,7 +26,8 @@ struct ScalarNormalization {
 
   // all other types: fallback to From -> float -> To
   template <typename From, typename To>
-  static constexpr std::enable_if_t<!std::is_floating_point_v<To> && !std::is_floating_point_v<From>, To>
+  static constexpr std::enable_if_t<
+      !std::is_floating_point_v<To> && !std::is_floating_point_v<From> && !std::is_same_v<From, To>, To>
   normalize(From value);
 
   template <typename Unsigned> struct UnsignedToSigned {};
@@ -74,7 +75,8 @@ ScalarNormalization::normalize(From value) {
 }
 
 template <typename From, typename To>
-constexpr std::enable_if_t<!std::is_floating_point_v<To> && !std::is_floating_point_v<From>, To>
+constexpr std::enable_if_t<
+    !std::is_floating_point_v<To> && !std::is_floating_point_v<From> && !std::is_same_v<From, To>, To>
 ScalarNormalization::normalize(From value) {
   return normalize<float, To>(normalize<From, float>(value));
 }

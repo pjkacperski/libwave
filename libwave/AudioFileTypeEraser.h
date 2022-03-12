@@ -10,7 +10,8 @@ public:
 
   std::size_t sampleRate() const override;
   std::size_t channels() const override;
-  std::size_t bytesLeft() const override;
+
+  std::size_t samplesLeft() const override;
 
   std::size_t readSamples(std::span<std::uint8_t> outout) override;
   std::size_t readSamples(std::span<std::int16_t> outout) override;
@@ -35,8 +36,8 @@ template <typename AudioFileImpl> std::size_t AudioFileTypeEraser<AudioFileImpl>
   return m_impl.channels();
 }
 
-template <typename AudioFileImpl> std::size_t AudioFileTypeEraser<AudioFileImpl>::bytesLeft() const {
-  return m_impl.bytesLeft();
+template <typename AudioFileImpl> std::size_t AudioFileTypeEraser<AudioFileImpl>::samplesLeft() const {
+  return m_impl.samplesLeft();
 }
 
 template <typename AudioFileImpl>

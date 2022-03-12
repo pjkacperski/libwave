@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
         break;
       }
     }
-  } while (file->bytesLeft() >= file->channels() * sizeof(float));
+  } while (file->samplesLeft() >= file->channels());
   snd_pcm_drain(handle);
   snd_pcm_close(handle);
   return 0;
