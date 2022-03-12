@@ -3,7 +3,8 @@
 #include <cstdint>
 #include <span>
 
-class AudioFile {
+class AudioFile
+{
 public:
   virtual ~AudioFile() = default;
 

@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <optional>
 
-struct Fact {
+struct Fact
+{
   std::optional<OffsetAndSize> streamInfo;
   std::uint32_t sampleLength;
 };

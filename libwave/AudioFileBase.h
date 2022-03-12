@@ -4,7 +4,8 @@
 #include <fstream>
 #include <span>
 
-class AudioFileBase {
+class AudioFileBase
+{
 public:
   std::size_t channels() const;
   std::size_t sampleRate() const;
@@ -26,7 +27,8 @@ private:
   std::size_t m_bytesRead;
 };
 
-template <typename T, std::size_t Extent> std::size_t AudioFileBase::read(std::span<T, Extent> out) {
+template <typename T, std::size_t Extent> std::size_t AudioFileBase::read(std::span<T, Extent> out)
+{
   static_assert(std::is_trivially_copyable_v<T>, "T must be trivially copyable");
   const auto count = std::min(out.size(), rawBytesLeft() / sizeof(T));
   m_stream.read(reinterpret_cast<char*>(out.data()), count * sizeof(T));

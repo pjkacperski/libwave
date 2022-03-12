@@ -3,7 +3,8 @@
 #include "OffsetAndSize.h"
 #include <string>
 
-struct UnknownChunk {
+struct UnknownChunk
+{
   std::string id;
   OffsetAndSize streamInfo;
 };
