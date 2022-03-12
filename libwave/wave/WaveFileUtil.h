@@ -9,7 +9,8 @@
 #include <tuple>
 #include <vector>
 
-class WaveFileUtil {
+class WaveFileUtil
+{
 public:
   static RiffHeader readRiff(std::ifstream& stream);
   static std::tuple<RiffHeader, std::vector<UnknownChunk>> readRiffAndUnknows(std::ifstream& stream);

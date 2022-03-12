@@ -3,7 +3,8 @@
 #include "AudioFile.h"
 #include <filesystem>
 
-class AudioFileUtil {
+class AudioFileUtil
+{
 public:
   enum class FileType
   {

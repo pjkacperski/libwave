@@ -7,8 +7,10 @@
 #include <variant>
 #include <vector>
 
-struct Fmt {
-  struct Extension {
+struct Fmt
+{
+  struct Extension
+  {
     std::uint16_t validBitsPerSample;
     std::uint32_t channelMask;
     std::uint8_t subFormat[16];

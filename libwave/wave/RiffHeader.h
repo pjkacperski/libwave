@@ -5,7 +5,8 @@
 #include "OffsetAndSize.h"
 #include <optional>
 
-struct RiffHeader {
+struct RiffHeader
+{
   std::uint32_t size;
   std::optional<Fmt> fmt;
   std::optional<Fact> fact;

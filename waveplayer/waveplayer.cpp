@@ -4,8 +4,10 @@
 #include <libwave/AudioFileUtil.h>
 #include <vector>
 
-int main(int argc, char* argv[]) {
-  if (argc != 2) {
+int main(int argc, char* argv[])
+{
+  if (argc != 2)
+  {
     throw std::runtime_error{"invalid arguments"};
   }
   auto file = AudioFileUtil::openFile(argv[1]);
@@ -26,13 +28,16 @@ int main(int argc, char* argv[]) {
   int dir;
   snd_pcm_hw_params_get_period_size(params, &frames, &dir);
   std::vector<float> buffer(frames * file->channels());
-  do {
+  do
+  {
     auto readSamples = file->readSamples(std::span(buffer));
-    if (readSamples > 0) {
+    if (readSamples > 0)
+    {
       auto ret = snd_pcm_writei(handle, buffer.data(), readSamples / file->channels());
       if (ret < 0)
         ret = snd_pcm_recover(handle, ret, 0);
-      if (ret < 0) {
+      if (ret < 0)
+      {
         std::cerr << "snd_pcm_writei failed: " << snd_strerror(ret) << std::endl;
         break;
       }
