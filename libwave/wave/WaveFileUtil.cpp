@@ -67,7 +67,7 @@ std::tuple<RiffHeader, std::vector<UnknownChunk>> WaveFileUtil::readRiffAndUnkno
     if (chunkId == "fmt ") {
       auto size = read<std::uint32_t>(stream);
       auto& fmt = riff.fmt.emplace();
-      fmt.streamInfo.emplace(stream.tellg(), size);
+      fmt.streamInfo.emplace(OffsetAndSize{stream.tellg(), size});
       read(stream, fmt.format);
       read(stream, fmt.channels);
       read(stream, fmt.samplesPerSecond);
@@ -94,18 +94,18 @@ std::tuple<RiffHeader, std::vector<UnknownChunk>> WaveFileUtil::readRiffAndUnkno
         throw std::runtime_error{"invalid data in stream"};
       }
       auto& fact = riff.fact.emplace();
-      fact.streamInfo.emplace(stream.tellg(), size);
+      fact.streamInfo.emplace(OffsetAndSize{stream.tellg(), size});
       read(stream, fact.sampleLength);
     } else if (chunkId == "data") {
       auto size = read<std::uint32_t>(stream);
-      riff.dataChunk.emplace(stream.tellg(), size);
+      riff.dataChunk.emplace(OffsetAndSize{stream.tellg(), size});
       break;
     } else { // unknown sub-chunk id
       auto size = read<std::uint32_t>(stream);
       if (!stream.seekg(size, std::ios::cur)) {
         throw std::runtime_error{"invalid data in stream"};
       }
-      unknownChunks.emplace_back(std::move(chunkId), OffsetAndSize{stream.tellg(), size});
+      unknownChunks.emplace_back(UnknownChunk{std::move(chunkId), stream.tellg(), size});
     }
   }
   return std::make_tuple(std::move(riff), std::move(unknownChunks));
