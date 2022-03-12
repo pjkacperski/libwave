@@ -2,14 +2,12 @@
 #include "wave/WaveFileUtil.h"
 #include <algorithm>
 #include <cctype>
-#include <iostream>
 #include <string>
 
 std::unique_ptr<AudioFile> AudioFileUtil::openFile(const std::filesystem::path& path) {
   auto extension = path.extension().string();
   std::transform(extension.begin(), extension.end(), extension.begin(),
                  [](unsigned char c) { return std::tolower(c); });
-  std::cout << extension << std::endl;
   if (extension == ".wav") {
     return openFile(path, FileType::WavFile);
   }

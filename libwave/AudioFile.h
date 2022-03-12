@@ -9,7 +9,8 @@ public:
 
   virtual std::size_t channels() const = 0;
   virtual std::size_t sampleRate() const = 0;
-  virtual std::size_t bytesLeft() const = 0;
+
+  virtual std::size_t samplesLeft() const = 0;
 
   virtual std::size_t readSamples(std::span<std::uint8_t> outout) = 0;
   virtual std::size_t readSamples(std::span<std::int16_t> outout) = 0;
