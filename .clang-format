@@ -1,6 +1,5 @@
 Language: Cpp
 BasedOnStyle: LLVM
-BreakBeforeBraces: Allman
 ColumnLimit: 120
 IndentWidth: 2
 TabWidth: 2
@@ -8,3 +7,18 @@ UseTab: Never
 AllowShortFunctionsOnASingleLine: None
 PointerAlignment: Left
 AllowShortEnumsOnASingleLine: false
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: true
+BreakBeforeBraces: Custom
