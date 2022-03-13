@@ -149,7 +149,7 @@ static std::unique_ptr<AudioFile> openPcmFile(std::ifstream stream, const Fmt& f
     return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::uint8_t, ScalarNormalization>>>(
         std::move(stream), dataChunk.size, fmt.channels, fmt.samplesPerSecond, 8u, WaveFormat::Pcm);
   case 12:
-    return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::uint16_t, ScalarNormalization>>>(
+    return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::int16_t, ScalarNormalization>>>(
         std::move(stream), dataChunk.size, fmt.channels, fmt.samplesPerSecond, 12u, WaveFormat::Pcm);
   case 16:
     return std::make_unique<AudioFileTypeEraser<UncompressedWaveFile<std::int16_t, ScalarNormalization>>>(
