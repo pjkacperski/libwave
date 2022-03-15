@@ -8,7 +8,7 @@ struct ScalarNormalization
 {
 
   // T -> T, no conversion needed
-  template <typename To, typename From>
+  template <typename From, typename To>
   static constexpr std::enable_if_t<std::is_same_v<To, From>, To> normalize(From value);
 
   // integral type -> floating point type (-1, 1)
@@ -53,7 +53,7 @@ template <> struct ScalarNormalization::UnsignedToSigned<std::uint64_t>
   using type = double;
 };
 
-template <typename To, typename From>
+template <typename From, typename To>
 constexpr std::enable_if_t<std::is_same_v<To, From>, To> ScalarNormalization::normalize(From value)
 {
   return value;
