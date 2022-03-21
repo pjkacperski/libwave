@@ -1,7 +1,6 @@
 #include "WaveFileUtil.h"
 #include "../AudioFileTypeEraser.h"
-#include "../ScalarNormalization.h"
-#include "AlawWaveFile.h"
+#include "G711WaveFile.h"
 #include "UncompressedWaveFile.h"
 #include "UnknownChunk.h"
 #include <memory>
@@ -199,8 +198,11 @@ std::unique_ptr<AudioFile> WaveFileUtil::openFile(const std::filesystem::path& p
   case WaveFormat::IeeeFloat:
     return openIeeeFloatFile(std::move(stream), *header.fmt, *header.dataChunk);
   case WaveFormat::Alaw:
-    return std::make_unique<AudioFileTypeEraser<AlawWaveFile>>(std::move(stream), header.dataChunk->size,
-                                                               header.fmt->channels, header.fmt->samplesPerSecond, 8u);
+    return std::make_unique<AudioFileTypeEraser<G711WaveFile<g711::Alaw>>>(
+        std::move(stream), header.dataChunk->size, header.fmt->channels, header.fmt->samplesPerSecond);
+  case WaveFormat::Ulaw:
+    return std::make_unique<AudioFileTypeEraser<G711WaveFile<g711::Ulaw>>>(
+        std::move(stream), header.dataChunk->size, header.fmt->channels, header.fmt->samplesPerSecond);
   default:
     throw std::runtime_error{"invalid file (unsupported format)"};
   }
