@@ -6,7 +6,6 @@
 
 struct ScalarNormalization
 {
-
   // T -> T, no conversion needed
   template <typename From, typename To>
   static constexpr std::enable_if_t<std::is_same_v<To, From>, To> normalize(From value);
@@ -15,9 +14,21 @@ struct ScalarNormalization
   template <typename From, typename To>
   static constexpr std::enable_if_t<std::is_integral_v<From> && std::is_floating_point_v<To>, To> normalize(From value);
 
+  // helper for integral type -> floating point type (-1, 1)
+  template <typename From, typename Through, typename To>
+  static constexpr std::enable_if_t<
+      std::is_integral_v<From> && std::is_floating_point_v<Through> && std::is_floating_point_v<To>, To>
+  normalize(From value);
+
   // floating point type (-1, 1) -> integral type
   template <typename From, typename To>
   static constexpr std::enable_if_t<std::is_floating_point_v<From> && std::is_integral_v<To>, To> normalize(From value);
+
+  // helper for floating point type (-1, 1) -> integral type
+  template <typename From, typename Through, typename To>
+  static constexpr std::enable_if_t<
+      std::is_floating_point_v<From> && std::is_floating_point_v<Through> && std::is_integral_v<To>, To>
+  normalize(From value);
 
   // floating point T -> floating point U
   template <typename From, typename To>
@@ -60,19 +71,34 @@ constexpr std::enable_if_t<std::is_same_v<To, From>, To> ScalarNormalization::no
 }
 
 template <typename From, typename To>
-std::enable_if_t<std::is_integral_v<From> && std::is_floating_point_v<To>, To> constexpr ScalarNormalization::normalize(
-    From value)
+constexpr std::enable_if_t<std::is_integral_v<From> && std::is_floating_point_v<To>, To>
+ScalarNormalization::normalize(From value)
 {
-  if constexpr (std::is_unsigned_v<From>)
+  if constexpr (std::numeric_limits<From>::max() < std::numeric_limits<std::int32_t>::max())
   {
-    return static_cast<To>(static_cast<typename UnsignedToSigned<From>::type>(value) -
-                           std::numeric_limits<From>::max() / 2) /
-           (std::numeric_limits<From>::max() / 2);
+    return normalize<From, float, To>(value);
   }
   else
   {
-    return value < 0 ? static_cast<To>(-value) / std::numeric_limits<From>::min()
-                     : static_cast<To>(value) / std::numeric_limits<From>::max();
+    return normalize<From, double, To>(value);
+  }
+}
+
+template <typename From, typename Through, typename To>
+constexpr std::enable_if_t<
+    std::is_integral_v<From> && std::is_floating_point_v<Through> && std::is_floating_point_v<To>, To>
+ScalarNormalization::normalize(From value)
+{
+  if constexpr (std::is_unsigned_v<From>)
+  {
+    return static_cast<To>(static_cast<Through>(static_cast<typename UnsignedToSigned<From>::type>(value) -
+                                                std::numeric_limits<From>::max() / 2) /
+                           (std::numeric_limits<From>::max() / 2));
+  }
+  else
+  {
+    return value < 0 ? static_cast<To>(static_cast<Through>(-value) / std::numeric_limits<From>::min())
+                     : static_cast<To>(static_cast<Through>(value) / std::numeric_limits<From>::max());
   }
 }
 
@@ -80,14 +106,29 @@ template <typename From, typename To>
 constexpr std::enable_if_t<std::is_floating_point_v<From> && std::is_integral_v<To>, To>
 ScalarNormalization::normalize(From value)
 {
-  if constexpr (std::is_unsigned_v<To>)
+  if constexpr (std::numeric_limits<To>::max() < std::numeric_limits<std::int32_t>::max())
   {
-    return static_cast<To>((value + 1) / 2 * std::numeric_limits<From>::max());
+    return normalize<From, float, To>(value);
   }
   else
   {
-    return value < 0 ? static_cast<To>(-value * std::numeric_limits<To>::min())
-                     : static_cast<To>(value * std::numeric_limits<To>::max());
+    return normalize<From, double, To>(value);
+  }
+}
+
+template <typename From, typename Through, typename To>
+constexpr std::enable_if_t<
+    std::is_floating_point_v<From> && std::is_floating_point_v<Through> && std::is_integral_v<To>, To>
+ScalarNormalization::normalize(From value)
+{
+  if constexpr (std::is_unsigned_v<To>)
+  {
+    return static_cast<To>((value + 1) / 2 * static_cast<Through>(std::numeric_limits<From>::max()));
+  }
+  else
+  {
+    return value < 0 ? static_cast<To>(-value * static_cast<Through>(std::numeric_limits<To>::min()))
+                     : static_cast<To>(value * static_cast<Through>(std::numeric_limits<To>::max()));
   }
 }
 
